@@ -39,7 +39,15 @@ export default function Login() {
       return;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+     const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  console.log('LOGIN DATA:', data);
+  console.log('LOGIN ERROR:', error);
+  console.log('EMAIL:', email);
+  console.log('PASSWORD:', password);
     setLoading(false);
     if (error) {
       const isConfirmationError = /confirm|confirmed|verify|email/i.test(error.message || '');
