@@ -20,6 +20,9 @@
       "package": "com.dinamica.igomanager"
     },
     "extra": {
+      "supabaseUrl": "https://tlmwwvfgarzigqkgogpa.supabase.co",
+      "supabaseAnonKey": "sb_publishable_wfjjn74goF-4gNIltr9dgA_rTIZp1c9",
+
       "eas": {
         "projectId": "igo-manager"
       }
