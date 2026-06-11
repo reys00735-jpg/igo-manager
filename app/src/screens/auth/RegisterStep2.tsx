@@ -1,25 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { hasSupabaseConfig, setDemoSession, supabase } from '../../lib/supabase';
+import { getCurrentUserProfile, hasSupabaseConfig, setDemoSession, supabase } from '../../lib/supabase';
 
 const sectors = ['Agro', 'Calzado/Moda', 'Tecnología', 'Servicios', 'Comercio', 'Salud', 'Turismo', 'Educación', 'Otro'];
 const sizes = ['Idea', 'Micro <10', 'Pequeña <50', 'Mediana <200', 'Grande'];
 const ages = ['18-25', '26-35', '36-45', '46-55', '+56'];
 const genders = ['Masculino', 'Femenino', 'Otro'];
-
-const retryAutoLogin = async (email: string, password: string) => {
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error && data.session) {
-      return { success: true, session: data.session };
-    }
-    if (attempt < 2) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-  }
-  return { success: false };
-};
 
 export default function RegisterStep2() {
   const navigation = useNavigation<any>();
@@ -55,16 +42,33 @@ export default function RegisterStep2() {
         return;
       }
 
-      let signedIn = Boolean(authData.session);
-      if (!signedIn) {
-        const autoLogin = await retryAutoLogin(form.correo, form.password);
-        signedIn = autoLogin.success;
+      const signedIn = Boolean(authData.session);
+      const needsConfirmation = Boolean(authData.user) && !authData.session;
+
+      if (!signedIn && needsConfirmation) {
+        setLoading(false);
+        navigation.replace('Login', {
+          registeredEmail: form.correo,
+          registeredPassword: form.password,
+          registrationSuccess: true,
+          registrationMessage: 'Tu cuenta se creó. Revisa tu correo para confirmar la cuenta y luego inicia sesión.',
+        });
+        return;
       }
 
-      const authUserId = authData.user?.id;
-      if (authUserId) {
-        const { error: profileError } = await supabase.from('users').insert({
-          auth_user_id: authUserId,
+      if (!signedIn) {
+        setLoading(false);
+        navigation.replace('Login', {
+          registeredEmail: form.correo,
+          registeredPassword: form.password,
+          registrationSuccess: true,
+          registrationMessage: 'Tu cuenta se creó. Si no recibes el correo de confirmación, inténtalo de nuevo en unos minutos.',
+        });
+        return;
+      }
+
+      if (signedIn) {
+        await getCurrentUserProfile({
           nombre: form.nombre,
           empresa: form.empresa,
           correo: form.correo,
@@ -75,22 +79,10 @@ export default function RegisterStep2() {
           genero: profile.genero,
           rol: 'emprendedor',
         });
-
-        if (profileError) {
-          console.warn(profileError.message);
-        }
       }
 
       setLoading(false);
-      if (signedIn) {
-        navigation.replace('Home');
-      } else {
-        navigation.replace('Login', {
-          registeredEmail: form.correo,
-          registeredPassword: form.password,
-          registrationSuccess: true,
-        });
-      }
+      navigation.replace('Home');
     } catch (err) {
       setLoading(false);
       setError('Ocurrió un problema inesperado. Intenta de nuevo.');

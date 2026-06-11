@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Slider } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Slider } from '@miblanchard/react-native-slider';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { updateUserInitiative } from '../lib/supabase';
 

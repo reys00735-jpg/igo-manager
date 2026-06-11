@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { hasSupabaseConfig, setDemoSession, supabase } from '../../lib/supabase';
+import { getCurrentUserProfile, hasSupabaseConfig, setDemoSession, supabase } from '../../lib/supabase';
 
 export default function Login() {
   const navigation = useNavigation<any>();
@@ -16,6 +16,7 @@ export default function Login() {
     const registeredEmail = route.params?.registeredEmail || '';
     const registeredPassword = route.params?.registeredPassword || '';
     const registrationSuccess = route.params?.registrationSuccess || false;
+    const registrationMessage = route.params?.registrationMessage || '';
 
     if (registeredEmail) {
       setEmail(registeredEmail);
@@ -24,9 +25,9 @@ export default function Login() {
       setPassword(registeredPassword);
     }
     if (registrationSuccess) {
-      setSuccessMessage('Cuenta creada con éxito. Ya puedes iniciar sesión.');
+      setSuccessMessage(registrationMessage || 'Cuenta creada con éxito. Ya puedes iniciar sesión.');
     }
-  }, [route.params?.registeredEmail, route.params?.registeredPassword, route.params?.registrationSuccess]);
+  }, [route.params?.registeredEmail, route.params?.registeredPassword, route.params?.registrationSuccess, route.params?.registrationMessage]);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -41,10 +42,16 @@ export default function Login() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      setError('Credenciales inválidas');
+      const isConfirmationError = /confirm|confirmed|verify|email/i.test(error.message || '');
+      setError(
+        isConfirmationError
+          ? 'Tu cuenta se creó. Revisa tu correo para confirmar la cuenta y luego inicia sesión.'
+          : error.message || 'Credenciales inválidas',
+      );
       return;
     }
     if (data.session) {
+      await getCurrentUserProfile();
       navigation.replace('Home');
     }
   };
