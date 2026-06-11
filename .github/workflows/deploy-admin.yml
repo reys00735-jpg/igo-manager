@@ -1,0 +1,15 @@
+name: Deploy Admin
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'admin-panel/**'
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: cd admin-panel && npm install && npm run build

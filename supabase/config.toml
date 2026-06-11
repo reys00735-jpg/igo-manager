@@ -1,0 +1,10 @@
+[auth]
+  enabled = true
+  external_google_enabled = false
+  external_apple_enabled = false
+
+[db]
+  port = 54322
+
+[studio]
+  enabled = true
