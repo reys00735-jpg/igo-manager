@@ -13,7 +13,7 @@ import Quadrants from './src/screens/Quadrants';
 import ActionPlan from './src/screens/ActionPlan';
 import { getSupabaseSession, hasSupabaseConfig, setDemoSession, supabase } from './src/lib/supabase';
 import { requestNotificationPermissions } from './src/lib/NotificationHandler';
-
+import Graficos from './src/screens/Graficos';
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -58,6 +58,7 @@ export default function App() {
             <Stack.Screen name="Prioritization" component={Prioritization} />
             <Stack.Screen name="Quadrants" component={Quadrants} />
             <Stack.Screen name="ActionPlan" component={ActionPlan} />
+            <Stack.Screen name="Graficos" component={Graficos} />
           </>
         ) : (
           <>
